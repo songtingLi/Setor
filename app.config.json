@@ -1,0 +1,5 @@
+{
+  "rootNode":"#root",
+  "rootJs":"src/root.js",
+  "rootCss":"src/root.css"
+}

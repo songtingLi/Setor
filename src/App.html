@@ -1,0 +1,25 @@
+<app-menu +list="menu.list" +shift="menu.shift">
+  <p slot>{{menu.current}}</p>
+</app-menu>
+
+<app-packhtml -router="packhtml"></app-packhtml>
+
+<app-base64 -router="base64"></app-base64>
+
+<script setor="S">
+  let menu = S.bind({
+    list: [
+      { id: 1, title: "packHtml", router: "packhtml" },
+      { id: 2, title: "Images" },
+      { id: 3, title: "Audioss" },
+      { id: 4, title: "Base64", router: "base64" },
+    ],
+    current: 1,
+    shift(m) {
+      menu.current = m.id;
+      m.router && S.to(m.router);
+    }
+  })
+
+  S.cite({ menu })
+</script>
