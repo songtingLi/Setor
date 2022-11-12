@@ -1,0 +1,103 @@
+<div class="showBox">
+  <label for="htmlUrl">Input url:</label>
+  <input id="htmlUrl" type="text" ::="data.src">
+  <br />
+  <label for="fileName">Input file name:</label>
+  <input id="fileName" type="text" ::="data.fileName">
+  <br />
+  <input type="button" value="download" @click="download()">
+  <br />
+  <iframe id="packIframe" :src="data.src" frameborder="1" sandbox="allow-same-origin"></iframe>
+  <p>{{data.loadedNum}}/{{data.allLoadedNum}}</p>
+  <div -router="packhtml/ak">akkkk</div>
+</div>
+
+<script setor="S">
+  const data = S.bind({
+    fileName: "index",
+    iframe: "#packIframe",
+
+    set src(v) {
+      data._src = v;
+      let date = new Date();
+      let fullDate = date.getFullYear() + String(date.getMonth() + 1).padStart(2, "0") + String(date.getDate()).padStart(2, "0");
+      let name = v.match(/(?<=_).*?(?=\/)/);
+      data.fileName = name + "_lyq_" + fullDate;
+    },
+    get src() {
+      return data._src || "";
+    },
+
+    allLoadedNum: 0,
+    get loadedNum() {
+      return data._loadedNum || 0;
+    },
+    set loadedNum(v) {
+      data._loadedNum = v;
+      if (v == data.allLoadedNum) {
+        let innerHTML = S.get(data.iframe).contentDocument.documentElement.innerHTML;
+        let downHTML = "<!DOCTYPE html> <html lang='en'>" + innerHTML + "</html>";
+        var aTag = document.createElement("a");
+        var blob = new Blob([downHTML]);
+        aTag.download = data.fileName + ".html";
+        aTag.href = URL.createObjectURL(blob);
+        aTag.click();
+        URL.revokeObjectURL(blob);
+      }
+    },
+  });
+
+  function download() {
+    let ifrDocument = S.get(data.iframe).contentDocument.documentElement;
+    let allScript = ifrDocument.querySelectorAll("script");
+    let allStyle = ifrDocument.querySelectorAll("link[rel='stylesheet']");
+    data.allLoadedNum = allScript.length + allStyle.length;
+    data.loadedNum = 0;
+
+    allScript.forEach(s => {
+      if (s.src) {
+        fetch(s.src)
+          .then(data => data.text())
+          .then(data => {
+            s.innerHTML = "\n" + data.replace(/\n/, "") + "\n";
+            data.loadedNum++;
+          });
+        s.setAttribute("name", s.src);
+        s.removeAttribute("src");
+      } else {
+        if (!s.getAttribute("name")) {
+          s.parentNode.removeChild(s);
+        }
+        data.loadedNum++;
+      }
+    });
+
+    allStyle.forEach(s => {
+      if (s.href) {
+        fetch(s.href)
+          .then(data => data.text())
+          .then(data => {
+            let style = document.createElement("style");
+            style.innerHTML = "\n" + data.replace(/\s+/g, " ") + "\n";
+            s.setAttribute("name", s.href);
+            s.parentNode.insertBefore(style, s);
+            s.parentNode.removeChild(s);
+            data.loadedNum++;
+          });
+      } else {
+        if (!s.getAttribute("name")) {
+          s.parentNode.removeChild(s);
+        } else {
+          let style = document.createElement("style");
+          style.innerHTML = s.innerHTML;
+          console.log(style);
+          document.head.appendChild(style);
+          s.parentNode.removeChild(s);
+        }
+        data.loadedNum++;
+      }
+    });
+  }
+
+  S.cite({ data, download });
+</script>

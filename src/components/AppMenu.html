@@ -1,0 +1,34 @@
+<div class="menuBox">
+  <p class="menu-item" -for="m in list" :class="{current:menu.current === m.id}" @clk="shift(m)">{{m.title}}</p>
+  <slot></slot>
+</div>
+
+<script setor="S">
+  S.cite({
+    list:S.props.list,
+    shift:S.props.shift
+  })
+</script>
+
+<style>
+  .menuBox {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0.5em;
+    box-shadow: 0 0 10px #0008;
+  }
+
+  .menu-item {
+    margin: 0 0.5em;
+  }
+
+  .menu-item:hover {
+    font-style: italic;
+    cursor: pointer;
+  }
+
+  .menu-item.current {
+    font-weight: 900;
+  }
+</style>
